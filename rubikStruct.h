@@ -5,7 +5,7 @@
 #include <time.h>
 #include "/home/tom/projets/c/lib/3Dlib/3Dlib.h"
 
-typedef enum {UNKNOWN, r_CUBE}e_rubikType;
+typedef enum {UNKNOWN, r_CUBE=1, r_PYRAMIX}e_rubikType;
 typedef enum {X=0, Y, Z}e_axeRot;
 //typedef enum {TOP=0, FRONT, BOTTOM, BACK, LEFT, RIGHT}e_facePos;
 typedef enum {FRONT=0, TOP, LEFT, RIGHT, BOTTOM, BACK}e_facePos;

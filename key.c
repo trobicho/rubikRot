@@ -156,15 +156,15 @@ void initKeyTab_fr(void)
 	keyTab[16]=(t_key){.key='j', .value=6, .axe=Y};
 	keyTab[17]=(t_key){.key='k', .value=7, .axe=Y};
 	keyTab[18]=(t_key){.key='l', .value=8, .axe=Y};
-	keyTab[26]=(t_key){.key='m', .value=9, .axe=Y};
+	keyTab[19]=(t_key){.key='m', .value=9, .axe=Y};
 	//axe Z
-	keyTab[19]=(t_key){.key='w', .value=0, .axe=Z};
-	keyTab[20]=(t_key){.key='x', .value=1, .axe=Z};
-	keyTab[21]=(t_key){.key='c', .value=2, .axe=Z};
-	keyTab[22]=(t_key){.key='v', .value=3, .axe=Z};
-	keyTab[23]=(t_key){.key='b', .value=4, .axe=Z};
-	keyTab[24]=(t_key){.key='n', .value=5, .axe=Z};
-	keyTab[25]=(t_key){.key=',', .value=6, .axe=Z};
+	keyTab[20]=(t_key){.key='w', .value=0, .axe=Z};
+	keyTab[21]=(t_key){.key='x', .value=1, .axe=Z};
+	keyTab[22]=(t_key){.key='c', .value=2, .axe=Z};
+	keyTab[23]=(t_key){.key='v', .value=3, .axe=Z};
+	keyTab[24]=(t_key){.key='b', .value=4, .axe=Z};
+	keyTab[25]=(t_key){.key='n', .value=5, .axe=Z};
+	keyTab[26]=(t_key){.key=',', .value=6, .axe=Z};
 	keyTab[27]=(t_key){.key=';', .value=7, .axe=Z};
 	keyTab[28]=(t_key){.key=':', .value=8, .axe=Z};
 	keyTab[29]=(t_key){.key='!', .value=9, .axe=Z};

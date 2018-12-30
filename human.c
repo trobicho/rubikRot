@@ -1,4 +1,5 @@
 #include "human.h"
+#include "../lib/3Dlib/setting.h"
 
 bool t_humanVector(t_vector3D *vector, SDL_Rect pos1, SDL_Rect pos2, int distMin);
 
@@ -141,7 +142,7 @@ void humanClick(t_rubik *rubik, SDL_Event *event)
 {
 	int faceN, distMin=20;
 	bool b_click=FALSE;
-	double vectMarg=0.2;
+	double vectMarg=0.8;
 	SDL_Rect click, motion;
 	t_vector3D vect;
 	if(event->type==SDL_MOUSEBUTTONDOWN && event->button.button==SDL_BUTTON_LEFT)

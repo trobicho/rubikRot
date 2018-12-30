@@ -1,12 +1,13 @@
 #include "click.h"
 #include "../lib/3Dlib/vector.h"
+#include "../lib/3Dlib/projection.h"
 
 int clickFace2D(t_rubik *rubik, int x, int y);
 int clickFace3D(t_rubik *rubik, int x, int y);
 bool dragClick2D(t_rubik *rubik, int faceN, t_vector3D vector, double margin);
 bool dragClick3D(t_rubik *rubik, int faceN, t_vector3D vector, double margin);
 int margeVect(t_rubik *rubik, t_vector3D v, int faceN, double margin, bool *invert);
-bool inPoly3D(t_formPoly3D *poly, int x, int y);
+bool inPoly3D(t_poly3D *poly, int x, int y, POINTORDER vOrder);
 double deltaRL(t_vertex3D v1, t_vertex3D v2, t_vertex3D p);
 t_vector3D vectDelZ(t_vector3D v);
 
@@ -47,23 +48,17 @@ int clickFace2D(t_rubik *rubik, int x, int y)
 int clickFace3D(t_rubik *rubik, int x, int y)
 {
 	int i;
-	t_vertex3D *vPoly=NULL;
 	t_poly3D poly;
 	bool valid;
-	/*
-	for(i=0; i<rubik->r_3D.scene.form->nbPoly; i++)
+	for(i=0; i<rubik->r_3D.form.nbPoly; i++)
 	{
-		if((vPoly=polyToCam(rubik->surface, &poly, &rubik->r_3D.scene.form->poly[i], rubik->r_3D.cam, 0, 1))!=NULL)
-		{
-			if(inPoly3D(&poly, x, y))
-				valid=1;
-		}
+		poly = projecting_formPoly3D(&rubik->r_3D.form.poly[i], &rubik->r_3D.cam);
+		if(inPoly3D(&poly, x, y, rubik->r_3D.form.poly[i].vertexOrder))
+			valid=1;
 		free(poly.vertex);
-		free(vPoly);
 		if(valid)
 			return i;
 	}
-	*/
 	return -1;
 }
 
@@ -224,15 +219,17 @@ int margeVect(t_rubik *rubik, t_vector3D v, int faceN, double margin, bool *inve
 	return -1;
 }
 
-bool inPoly3D(t_formPoly3D *poly, int x, int y)
+bool inPoly3D(t_poly3D *poly, int x, int y, POINTORDER vOrder)
 {
 	int i;
 	t_vertex3D p={.x=(double)x, .y=(double)y};
+	if(!poly->nbVertex)
+		return 0;
 	for(i=0; i<poly->nbVertex; i++)
 	{
-		if(poly->vertexOrder==CLOCKWISE && deltaRL(*poly->vertex[i], *poly->vertex[((i+1==poly->nbVertex)?0:i+1)], p)<0)
+		if(vOrder == CLOCKWISE && deltaRL(poly->vertex[i], poly->vertex[((i+1==poly->nbVertex)?0:i+1)], p)<0)
 			return 0;
-		else if(poly->vertexOrder!=CLOCKWISE && deltaRL(*poly->vertex[i], *poly->vertex[((i+1==poly->nbVertex)?0:i+1)], p)>0)
+		else if(vOrder!=CLOCKWISE && deltaRL(poly->vertex[i], poly->vertex[((i+1==poly->nbVertex)?0:i+1)], p)>0)
 			return 0;
 	}
 	return 1;

@@ -10,6 +10,7 @@ void main(int argc, char **argv)
 	int i, c, faceW=3;
 	char fileColor[1000];
 	bool colorDef=FALSE;
+	int rType = r_CUBE;
 
 	SDL_Init(SDL_INIT_VIDEO);
 	SDL_Surface *screen=SDL_SetVideoMode(800, 400, 32, SDL_HWSURFACE | SDL_DOUBLEBUF | SDL_RESIZABLE);
@@ -31,6 +32,10 @@ void main(int argc, char **argv)
 					colorDef=1;
 					i++;
 					break;
+				case 't':
+					sscanf(argv[i+1], "%d", &rType);
+					i++;
+					break;
 				case 'h':
 					printf("use -w ()");
 					break;
@@ -39,11 +44,11 @@ void main(int argc, char **argv)
 	}
 	t_rubik rubik={
 		.surface=screen,
-		.type=r_CUBE,
-		.nbFace=6,
-		.nbSide=4,
-		.nbColor=6,
-		.nbCrown=6,
+		.type=((rType > 2 || rType == 0) ? r_CUBE : rType),
+		.nbFace=(rType == 2 ? 4 : 6),
+		.nbSide=(rType == 2 ? 3 : 4),
+		.nbColor=rubik.nbFace,
+		.nbCrown=rubik.nbFace,
 		.display={
 			.backgroundColor=0x505050,
 			.caseContLen=2,
