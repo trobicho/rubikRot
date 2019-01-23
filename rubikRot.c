@@ -6,7 +6,7 @@ int rot(t_rubik *rubik, int crown, int rot)
 
 	for(b=0; b<rot; b++)
 	{
-		for(i=0; i<rubik->face[0].w; i++)
+		for(i=0; i<rubik->crown[crown].faceLine[0].nbCase; i++)
 		{
 			s=rubik->face[rubik->crown[crown].faceLine[0].face].tab[rubik->crown[crown].faceLine[0].line[i]];
 			for(a=0; a<rubik->crown[crown].nbFace; a++)

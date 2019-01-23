@@ -2,7 +2,6 @@
 
 int getFV(int face, int w, int v);
 int getVH(int w, int *v);
-int sigma(int w, int a);
 
 void pyramix3Dinit(t_form *form, t_rubik *rubik)
 {
@@ -45,7 +44,6 @@ void pyramix3Dcreate(t_form *pyramix, t_rubik *rubik)
 	pyramix->poly=malloc(sizeof(t_formPoly3D)*pyramix->nbPoly);
 	pyramix->nbVertex=sigma(w, 3) + sigma(w-2, 1) + 1;
 	pyramix->vertex=malloc(sizeof(t_vertex3D)*pyramix->nbVertex);
-	printf("nbV = %d\n", pyramix->nbVertex);
 	for(i=0; i<pyramix->nbVertex; i++, x++)
 	{
 		if(((y==0 || z==0) && x>(w-(z+y))) || (y>0 && z>0 && x>1))
@@ -65,7 +63,6 @@ void pyramix3Dcreate(t_form *pyramix, t_rubik *rubik)
 			pyramix->vertex[i].x=(1.0/w)*((double)x + y/2.0 + z/2.0);
 		pyramix->vertex[i].y=(Hy/w)*y + (My/w)*z;
 		pyramix->vertex[i].z=(Hz/w)*z;
-		printf("[%d](%lf, %lf, %lf)\n", i, pyramix->vertex[i].x*10, pyramix->vertex[i].y*10, pyramix->vertex[i].z*10);
 
 	}
 	int i2;
@@ -83,42 +80,33 @@ void pyramix3Dcreate(t_form *pyramix, t_rubik *rubik)
 		pyramix->poly[i].vertex=malloc(sizeof(t_vertex3D**)*3);
 		pyramix->poly[i].texture_type=COLOR;
 		pyramix->poly[i].doubleNormal=0;
-		if(i/facePoly > 3)
+
+		int iw = cw*2-1;
+		if(i2 >= iw)
 		{
-			pyramix->poly[i].vertex[0]=&pyramix->vertex[0];
-			pyramix->poly[i].vertex[1]=&pyramix->vertex[1];
-			pyramix->poly[i].vertex[2]=&pyramix->vertex[2];
+			i2 = 0;
+			ai2 += cw + 1;
+			cw--;
+		}
+		if(i2%iw >= cw)
+		{
+			pyramix->poly[i].vertex[0]=pyramix->poly[i-cw].vertex[2];
+			pyramix->poly[i].vertex[1]=pyramix->poly[i-cw].vertex[1];
+			pyramix->poly[i].vertex[2]=pyramix->poly[(i-cw)+1].vertex[2];
+			if((i/facePoly)%2 == 0)
+				pyramix->poly[i].vertexOrder=CLOCKWISE;
+			else
+				pyramix->poly[i].vertexOrder=COUNTERCLOCKWISE;
 		}
 		else
 		{
-			int iw = cw*2-1;
-			if(i2 >= iw)
-			{
-				i2 = 0;
-				ai2 += cw + 1;
-				cw--;
-			}
-			if(i2%iw >= cw)
-			{
-				printf("%d (%d): %d, %d\n", facePoly, i2, iw, w);
-				pyramix->poly[i].vertex[0]=pyramix->poly[i-cw].vertex[2];
-				pyramix->poly[i].vertex[1]=pyramix->poly[i-cw].vertex[1];
-				pyramix->poly[i].vertex[2]=pyramix->poly[(i-cw)+1].vertex[2];
-				if((i/facePoly)%2 == 0)
-					pyramix->poly[i].vertexOrder=CLOCKWISE;
-				else
-					pyramix->poly[i].vertexOrder=COUNTERCLOCKWISE;
-			}
+			pyramix->poly[i].vertex[0]=&pyramix->vertex[getFV(i/facePoly, w, ai2 + i2)];
+			pyramix->poly[i].vertex[1]=&pyramix->vertex[getFV(i/facePoly, w, ai2 + i2+1)];
+			pyramix->poly[i].vertex[2]=&pyramix->vertex[getFV(i/facePoly, w, ai2 + i2+cw+1)];
+			if((i/facePoly)%2 == 0)
+				pyramix->poly[i].vertexOrder=CLOCKWISE;
 			else
-			{
-				pyramix->poly[i].vertex[0]=&pyramix->vertex[getFV(i/facePoly, w, ai2 + i2)];
-				pyramix->poly[i].vertex[1]=&pyramix->vertex[getFV(i/facePoly, w, ai2 + i2+1)];
-				pyramix->poly[i].vertex[2]=&pyramix->vertex[getFV(i/facePoly, w, ai2 + i2+cw+1)];
-				if((i/facePoly)%2 == 0)
-					pyramix->poly[i].vertexOrder=CLOCKWISE;
-				else
-					pyramix->poly[i].vertexOrder=COUNTERCLOCKWISE;
-			}
+				pyramix->poly[i].vertexOrder=COUNTERCLOCKWISE;
 		}
 	}
 }
@@ -131,7 +119,6 @@ int getFV(int face, int w, int v)
 	int vH = getVH(w+1, &v);
 	int v2=0;
 
-	printf("getFV: face(%d) v(%d) vH(%d)\n", face, v, vH);
 	if(vH == 0)
 	{
 		if(face == 1)
@@ -170,7 +157,6 @@ int getFV(int face, int w, int v)
 		}
 	}
 	//v += ((face-1)*(w-vH));
-	printf("%d\n", v2);
 	return (face == 1 ? v2+v : v2);
 }
 
@@ -204,6 +190,16 @@ int sigma(int w, int a)
 	for(i=0; i<w; i++)
 	{
 		r+=(i+1)*a;
+	}
+	return r;
+}
+
+int invertSigma(int w, int a, int s)
+{
+	int i, r=0;
+	for(i=0; i<w; i++)
+	{
+		r+=(a-i*s);
 	}
 	return r;
 }

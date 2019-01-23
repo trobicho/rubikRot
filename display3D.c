@@ -1,7 +1,9 @@
 #include "display3D.h"
 #include "../lib/3Dlib/matrix.h"
+#include "pyramix.h"
 
-Uint32 getColorFace(t_rubik *rubik, int faceN);
+Uint32 getCubeColorFace(t_rubik *rubik, int faceN);
+Uint32 getPyramixColorFace(t_rubik *rubik, int faceN);
 
 void draw3dRubik(t_rubik *rubik)
 {
@@ -17,14 +19,19 @@ void draw3dRubik(t_rubik *rubik)
 	if(rubik->r_3D.b_color)
 	{
 		for(i=0; i<rubik->r_3D.form.nbPoly; i++)
-			drawFormPoly3D_UniColor(&rubik->r_3D.form.poly[i], NULL, getColorFace(rubik, i), 1);
+		{
+			if(rubik->type == r_PYRAMIX)
+				drawFormPoly3D_UniColor(&rubik->r_3D.form.poly[i], NULL, getPyramixColorFace(rubik, i), 1);
+			else
+				drawFormPoly3D_UniColor(&rubik->r_3D.form.poly[i], NULL, getCubeColorFace(rubik, i), 1);
+		}
 	}
 	else
 		drawForm_sk(&rubik->r_3D.form, NULL, 2, 0x0);
 	drawTriAxe(rubik->r_3D.triAxe, triAxePos, triAxeSize, 3);
 }
 
-Uint32 getColorFace(t_rubik *rubik, int faceN)
+Uint32 getCubeColorFace(t_rubik *rubik, int faceN)
 {
 	int w=rubik->face->w, sqrtW=w*w, n=faceN%sqrtW;
 	switch(faceN/sqrtW)
@@ -46,6 +53,29 @@ Uint32 getColorFace(t_rubik *rubik, int faceN)
 			break;
 		case 5:
 			return rubik->color[rubik->face[BACK].tab[(w-n/w-1)*w+(n%w)]];
+			break;
+	}
+	return 0;
+}
+
+Uint32 getPyramixColorFace(t_rubik *rubik, int faceN)
+{
+	int w=rubik->face->w;
+	int nbFV = calc_nbPolyFace(rubik->face[0].w);
+	int n=faceN%nbFV;
+	switch(faceN/nbFV)
+	{
+		case 0:
+			return rubik->color[rubik->face[FRONT].tab[n]];//+n*10;
+			break;
+		case 1:
+			return rubik->color[rubik->face[TOP].tab[n]];//-n*10;
+			break;
+		case 2:
+			return rubik->color[rubik->face[LEFT].tab[n]];//+n*10;
+			break;
+		case 3:
+			return rubik->color[rubik->face[RIGHT].tab[n]];//+n*10;
 			break;
 	}
 	return 0;

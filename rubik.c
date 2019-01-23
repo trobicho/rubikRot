@@ -1,6 +1,10 @@
 #include "rubik.h"
 #include "pyramix.h"
 
+int pyramixTabRot(t_rubik *rubik, int t, int r);
+int setXYI(int w, int x, int y, int i);
+int getXYI(int t, int w, int *x, int *y);
+
 void rubikInit(t_rubik *rubik, int faceW, int faceH)
 {
 	int i=0;
@@ -17,7 +21,10 @@ void rubikInit(t_rubik *rubik, int faceW, int faceH)
 			rubik->face[i].nbCase=faceW*faceH;
 		rubik->face[i].tab=malloc(sizeof(int)*rubik->face[i].nbCase);
 	}
-	cubeCrownInit(rubik);
+	if(rubik->type == r_PYRAMIX)
+		pyramixCrownInit(rubik);
+	else
+		cubeCrownInit(rubik);
 }
 
 void faceInit(r_face *face, int tabV)
@@ -124,6 +131,7 @@ int cubeCrownInit(t_rubik *rubik)
 int pyramixCrownInit(t_rubik *rubik)
 {
 	int a, b, i, face;
+	int nbFV = calc_nbPolyFace(rubik->face[0].w);
 	if(rubik->type==r_PYRAMIX)
 	{
 		rubik->nbCrown=4*rubik->face[0].w;
@@ -137,15 +145,18 @@ int pyramixCrownInit(t_rubik *rubik)
 		rubik->crown[i].axe=i/rubik->face[0].w;
 		rubik->crown[i].faceLine=malloc(sizeof(r_faceLine)*rubik->crown[i].nbFace);
 	}
-	rubik->crown[0].faceLine[0].face=TOP;
-	rubik->crown[0].faceLine[1].face=BACK;
-	rubik->crown[0].faceLine[2].face=BOTTOM;
-	rubik->crown[rubik->face[0].w].faceLine[0].face=FRONT;
-	rubik->crown[rubik->face[0].w].faceLine[1].face=LEFT;
-	rubik->crown[rubik->face[0].w].faceLine[2].face=BACK;
-	rubik->crown[rubik->face[0].w*2].faceLine[0].face=TOP;
-	rubik->crown[rubik->face[0].w*2].faceLine[1].face=RIGHT;
-	rubik->crown[rubik->face[0].w*2].faceLine[2].face=BOTTOM;
+	rubik->crown[0].faceLine[0].face=RIGHT;
+	rubik->crown[0].faceLine[1].face=LEFT;
+	rubik->crown[0].faceLine[2].face=TOP;
+	rubik->crown[rubik->face[0].w].faceLine[0].face=LEFT;
+	rubik->crown[rubik->face[0].w].faceLine[1].face=RIGHT;
+	rubik->crown[rubik->face[0].w].faceLine[2].face=FRONT;
+	rubik->crown[rubik->face[0].w*2].faceLine[0].face=RIGHT;
+	rubik->crown[rubik->face[0].w*2].faceLine[1].face=FRONT;
+	rubik->crown[rubik->face[0].w*2].faceLine[2].face=TOP;
+	rubik->crown[rubik->face[0].w*3].faceLine[0].face=RIGHT;
+	rubik->crown[rubik->face[0].w*3].faceLine[1].face=BACK;
+	rubik->crown[rubik->face[0].w*3].faceLine[2].face=TOP;
 	for(i=0; i<rubik->nbCrown; i++)
 	{
 		for(a=0; a<rubik->crown[i].nbFace; a++)
@@ -158,55 +169,64 @@ int pyramixCrownInit(t_rubik *rubik)
 			rubik->crown[i].faceAttached=-1;
 			for(b=0; b<rubik->crown[i].faceLine[a].nbCase; b++)
 			{
+				if(i%rubik->face[0].w==0)
+				{
+					rubik->crown[i].faceAttached=rubik->crown[i].axe;
+					rubik->crown[i].faceRotV=1;
+				}
 				switch(rubik->crown[i].axe)
 				{
-					case X:
-						rubik->crown[i].faceLine[a].line[b]=b*rubik->face[0].w+(i%rubik->face[0].w);
-						if(i%rubik->face[0].w==0)
-						{
-							rubik->crown[i].faceAttached=LEFT;
-							rubik->crown[i].faceRotV=1;
-						}
-						else if(i%rubik->face[0].w==rubik->face[0].w-1)
-						{
-							rubik->crown[i].faceAttached=RIGHT;
-							rubik->crown[i].faceRotV=3;
-						}
+					case 0:
+						rubik->crown[i].faceLine[a].line[b] = b + invertSigma(i, rubik->face[0].w*2-1, 2);
+						//printf("a = %d i = %d (%d) %d\n", a, i, rubik->crown[i].faceLine[a].line[b], rubik->crown[i].faceLine[a].nbCase);
 						break;
-					case Y:
-						rubik->crown[i].faceLine[a].line[b]=((face==BACK)?b:rubik->face[0].w-(b+1))+rubik->face[0].w*((face==BACK)?rubik->face[0].w-(i%rubik->face[0].w+1):i%rubik->face[0].w);
-						if(i%rubik->face[0].w==0)
-						{
-							rubik->crown[i].faceAttached=TOP;
-							rubik->crown[i].faceRotV=3;
-						}
-						else if(i%rubik->face[0].w==rubik->face[0].w-1)
-						{
-							rubik->crown[i].faceAttached=BOTTOM;
-							rubik->crown[i].faceRotV=1;
-						}
+					case 1:
+						rubik->crown[i].faceLine[a].line[b] = b + invertSigma(i%rubik->face[0].w, rubik->face[0].w*2-1, 2);
+						printf("a = %d i = %d (%d) %d\n", a, i, rubik->crown[i].faceLine[a].line[b], rubik->crown[i].faceLine[a].nbCase);
 						break;
-					case Z:
-						if(face==TOP || face==BOTTOM)
-							rubik->crown[i].faceLine[a].line[b]=((face==TOP)?b:rubik->face[0].w-(b+1))+fabs(((face==TOP)?rubik->face[0].w-1:0)-\
-									(i%rubik->face[0].w))*rubik->face[0].w;
-						else
-							rubik->crown[i].faceLine[a].line[b]=((face==RIGHT)?b:rubik->face[0].w-(b+1))*rubik->face[0].w+\
-																fabs(((face==LEFT)?rubik->face[0].w-1:0)-i%rubik->face[0].w);
-						if(i%rubik->face[0].w==0)
-						{
-							rubik->crown[i].faceAttached=FRONT;
-							rubik->crown[i].faceRotV=3;
-						}
-						else if(i%rubik->face[0].w==rubik->face[0].w-1)
-						{
-							rubik->crown[i].faceAttached=BACK;
-							rubik->crown[i].faceRotV=1;
-						}
+					default:
+						rubik->crown[i].faceLine[a].line[b] = 0;
 						break;
 				}
 			}
 		}
+	}
+}
+
+int pyramixTabRot(t_rubik *rubik, int t, int r)
+{
+	int w = rubik->face[0].w;
+	int x, y;
+	int i = getXYI(t, w, &x, &y);
+	
+}
+
+int setXYI(int w, int x, int y, int i)
+{
+	int i, t = 0;
+	for(i=0; i<y; i++)
+	{
+		t += w*2-1;
+	}
+	return ((t+x) + (i? w : 0));
+}
+
+int getXYI(int t, int w, int *x, int *y)
+{
+	for(*y=0; y<w; y++)
+	{
+		if(t < w)
+		{
+			*x = t;
+			return 0;
+		}
+		else if(t < w*2-1)
+		{
+			*x = t-w;
+			return 1;
+		}
+		t-=w*2-1;
+		w--;
 	}
 }
 

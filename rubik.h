@@ -5,6 +5,7 @@
 void rubikInit(t_rubik *rubik, int faceW, int faceH);
 void faceInit(r_face *face, int tabV);
 int cubeCrownInit(t_rubik *rubik);
+int pyramixCrownInit(t_rubik *rubik);
 bool rubikSolve(t_rubik *rubik);
 void rubikMix(t_rubik *rubik, int nbRot);
 void freeRubik(t_rubik *rubik);
